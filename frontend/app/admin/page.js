@@ -21,7 +21,7 @@ export default function AdminPanel() {
     setStatus({ type: 'loading', message: 'Kaydediliyor...' });
     
     try {
-      const response = await fetch('http://localhost:8000/api/menu-ekle', {
+      const response = await fetch('https://ar-menu-saas-2.onrender.com/api/menu-ekle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

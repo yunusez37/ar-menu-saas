@@ -7,7 +7,7 @@ export default function Home() {
 
   useEffect(() => {
     // API artık spesifik bir restoranın (pisi-pizza) menüsünü getiriyor
-    fetch('http://192.168.1.109:8000/api/menu/pisi-pizza')
+    fetch('https://ar-menu-saas-2.onrender.com/api/')
       .then(res => res.json())
       .then(data => {
         setRestaurantName(data.restaurant_name);
