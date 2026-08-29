@@ -12,11 +12,12 @@ class MenuItemCreate(BaseModel):
     glb_url: str = None
     usdz_url: str = None
 
-# Tabloları veritabanında oluştur (Gerçek projelerde Alembic kullanılır, başlangıç için bu idealdir)
+# Tabloları veritabanında oluştur (Supabase'de tabloları otomatik kurar)
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="QR AR Menü API")
 
+# CORS Ayarları (Vercel gibi dış alan adlarından gelen isteklere izin verir)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -56,11 +57,12 @@ def get_restaurant_menu(restaurant_slug: str, db: Session = Depends(get_db)):
         "restaurant_name": restaurant.name,
         "menu": menu_data
     }
+
 @app.get("/api/verileri-olustur")
 def seed_database(db: Session = Depends(get_db)):
     # Eğer restoran zaten varsa tekrar ekleme
     if db.query(models.Restaurant).first():
-        return {"mesaj": "Veriler zaten MS SQL veritabanında mevcut!"}
+        return {"mesaj": "Veriler zaten Supabase veritabanında mevcut!"}
     
     # 1. Restoranı oluştur
     restaurant = models.Restaurant(name="Pisi Pizza", slug="pisi-pizza")
@@ -86,7 +88,7 @@ def seed_database(db: Session = Depends(get_db)):
     db.add(item)
     db.commit()
 
-    return {"mesaj": "Pisi Pizza menüsü başarıyla MS SQL veritabanına eklendi!"}
+    return {"mesaj": "Pisi Pizza menüsü başarıyla Supabase veritabanına eklendi!"}
 
 @app.post("/api/menu-ekle")
 def add_menu_item(item: MenuItemCreate, db: Session = Depends(get_db)):
