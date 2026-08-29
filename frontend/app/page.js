@@ -73,7 +73,7 @@ export default function MenuPage() {
           background: 'linear-gradient(135deg, #d4af37 0%, #ffdf73 100%)',
           WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
         }}>
-          {activeCategory || (menuData?.restaurant_name || "Pisi QR Sistemi")}
+          {activeCategory || "Pisi QR Sistemi"}
         </h1>
       </div>
 
