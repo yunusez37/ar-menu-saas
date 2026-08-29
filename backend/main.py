@@ -12,13 +12,12 @@ class MenuItemCreate(BaseModel):
     image_url: str = None
     glb_url: str = None
     usdz_url: str = None
+    category_name: str  # YENİ: Dinamik kategori adı
 
-# Tabloları veritabanında oluştur (Supabase'de tabloları otomatik kurar)
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="QR AR Menü API")
+app = FastAPI(title="Pisi QR Menü API")
 
-# CORS Ayarları (Vercel gibi dış alan adlarından gelen isteklere izin verir)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -27,104 +26,62 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Yeni bir restoranın menüsünü getiren dinamik Endpoint
 @app.get("/api/menu/{restaurant_slug}")
 def get_restaurant_menu(restaurant_slug: str, db: Session = Depends(get_db)):
-    # 1. Önce URL'den restoranı bul
     restaurant = db.query(models.Restaurant).filter(models.Restaurant.slug == restaurant_slug).first()
-    
     if not restaurant:
         raise HTTPException(status_code=404, detail="Restoran bulunamadı")
 
-    # 2. Restorana ait kategorileri ve ürünleri toparla
     menu_data = []
     for category in restaurant.categories:
-        cat_data = {
-            "category_name": category.name,
-            "items": []
-        }
+        cat_data = {"category_name": category.name, "items": []}
         for item in category.items:
             cat_data["items"].append({
-                "id": item.id,
-                "name": item.name,
-                "description": item.description,
-                "image_url": item.image_url,
-                "price": item.price,
-                "glb_url": item.glb_url,
-                "usdz_url": item.usdz_url
+                "id": item.id, "name": item.name, "description": item.description,
+                "price": item.price, "image_url": item.image_url,
+                "glb_url": item.glb_url, "usdz_url": item.usdz_url
             })
         menu_data.append(cat_data)
         
-    return {
-        "restaurant_name": restaurant.name,
-        "menu": menu_data
-    }
-
-@app.get("/api/verileri-olustur")
-def seed_database(db: Session = Depends(get_db)):
-    # Eğer restoran zaten varsa tekrar ekleme
-    if db.query(models.Restaurant).first():
-        return {"mesaj": "Veriler zaten Supabase veritabanında mevcut!"}
-    
-    # 1. Restoranı oluştur
-    restaurant = models.Restaurant(name="Pisi Pizza", slug="pisi-pizza")
-    db.add(restaurant)
-    db.commit()
-    db.refresh(restaurant)
-
-    # 2. Kategori oluştur
-    category = models.Category(name="Popüler Seçimler", restaurant_id=restaurant.id)
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    # 3. Ürünü ve 3D Modeli ekle
-    item = models.MenuItem(
-        name="Margarita Pizza",
-        description="Odun ateşinde pişmiş enfes İtalyan lezzeti.",
-        price=250.0,
-        glb_url="https://modelviewer.dev/shared-assets/models/Astronaut.glb",
-        usdz_url="https://modelviewer.dev/shared-assets/models/Astronaut.usdz",
-        category_id=category.id
-    )
-    db.add(item)
-    db.commit()
-
-    return {"mesaj": "Pisi Pizza menüsü başarıyla Supabase veritabanına eklendi!"}
+    return {"restaurant_name": restaurant.name, "menu": menu_data}
 
 @app.post("/api/menu-ekle")
 def add_menu_item(item: MenuItemCreate, db: Session = Depends(get_db)):
-    # 1. Restoranı bul, yoksa (veritabanı yeniyse) otomatik oluştur
-    restaurant = db.query(models.Restaurant).filter(models.Restaurant.slug == "pisi-pizza").first()
-    
+    # Restoranı bul veya oluştur (Yeni isimle)
+    restaurant = db.query(models.Restaurant).filter(models.Restaurant.slug == "pisi-qr-sistemi").first()
     if not restaurant:
-        restaurant = models.Restaurant(name="Pisi Pizza", slug="pisi-pizza")
+        restaurant = models.Restaurant(name="Pisi QR Sistemi 🚀", slug="pisi-qr-sistemi")
         db.add(restaurant)
         db.commit()
         db.refresh(restaurant)
         
-        # Restoran yeni oluştuysa varsayılan bir kategori de ekleyelim
-        category = models.Category(name="Popüler Seçimler", restaurant_id=restaurant.id)
+    # Kategoriyi bul veya yeni oluştur
+    category = db.query(models.Category).filter(
+        models.Category.restaurant_id == restaurant.id,
+        models.Category.name == item.category_name
+    ).first()
+    
+    if not category:
+        category = models.Category(name=item.category_name, restaurant_id=restaurant.id)
         db.add(category)
         db.commit()
         db.refresh(category)
-    else:
-        # Restoran varsa ilk kategorisini al
-        category = db.query(models.Category).filter(models.Category.restaurant_id == restaurant.id).first()
     
-    # 2. Gelen verilerle yeni bir ürün oluştur
     new_item = models.MenuItem(
-        name=item.name,
-        price=item.price,
-        description=item.description,
-        image_url=item.image_url,
-        glb_url=item.glb_url,
-        usdz_url=item.usdz_url,
+        name=item.name, price=item.price, description=item.description,
+        image_url=item.image_url, glb_url=item.glb_url, usdz_url=item.usdz_url,
         category_id=category.id
     )
-    
-    # 3. Veritabanına (Supabase) kaydet
     db.add(new_item)
     db.commit()
-    
-    return {"mesaj": f"{item.name} başarıyla Supabase veritabanına eklendi!"}
+    return {"mesaj": f"{item.name} başarıyla eklendi!"}
+
+# YENİ: Ürün Silme Endpoint'i
+@app.delete("/api/menu-sil/{item_id}")
+def delete_menu_item(item_id: int, db: Session = Depends(get_db)):
+    item = db.query(models.MenuItem).filter(models.MenuItem.id == item_id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Ürün bulunamadı")
+    db.delete(item)
+    db.commit()
+    return {"mesaj": "Ürün başarıyla silindi"}
