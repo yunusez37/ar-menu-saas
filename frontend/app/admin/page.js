@@ -2,12 +2,10 @@
 import { useState, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 
+// Müşteri ekranındaki görsellerle birebir eşleşen temiz liste
 const CATEGORIES = [
-  "🗓️ Günün Menüsü", "🥘 Ana Yemekler", "🥩 Et Yemekleri", "🍗 Tavuk Yemekleri",
-  "🐟 Balık Yemekleri", "🥦 Sebze Yemekleri", "🍋 Zeytinyağlılar", "🥣 Çorbalar",
-  "🍛 Pilavlar", "🍝 Makarnalar", "🥗 Salatalar", "🌮 Mezeler",
-  "🍮 Tatlılar", "🧁 Kek Tarifleri", "🍪 Kurabiye Tarifleri", "🍰 Pasta Tarifleri",
-  "🍳 Kahvaltılıklar", "🥨 Hamur İşleri", "🥯 Poğaça Tarifleri", "🥐 Börek Tarifleri"
+  "Günün Menüsü", "Ana Yemekler", "Et Yemekleri", "Tavuk Yemekleri",
+  "Balık Yemekleri", "Makarnalar", "Salatalar", "Mezeler", "Tatlılar", "İçecekler"
 ];
 
 export default function AdminPanel() {
