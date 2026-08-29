@@ -9,7 +9,7 @@ export default function AdminPanel() {
   });
   const [status, setStatus] = useState({ type: '', message: '' });
 
-  const menuUrl = "http://192.168.1.109:3000"; 
+  const menuUrl = "https://ar-menu-saas1.vercel.app"; 
 
   // Sayfanın sadece tarayıcıda yüklendiğinden emin oluyoruz (Hydration sorununu çözer)
   useEffect(() => {
