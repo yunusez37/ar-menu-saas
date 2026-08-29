@@ -90,9 +90,23 @@ def seed_database(db: Session = Depends(get_db)):
 
 @app.post("/api/menu-ekle")
 def add_menu_item(item: MenuItemCreate, db: Session = Depends(get_db)):
-    # 1. Önce restoranı ve ilk kategorisini bul
+    # 1. Restoranı bul, yoksa (veritabanı yeniyse) otomatik oluştur
     restaurant = db.query(models.Restaurant).filter(models.Restaurant.slug == "pisi-pizza").first()
-    category = db.query(models.Category).filter(models.Category.restaurant_id == restaurant.id).first()
+    
+    if not restaurant:
+        restaurant = models.Restaurant(name="Pisi Pizza", slug="pisi-pizza")
+        db.add(restaurant)
+        db.commit()
+        db.refresh(restaurant)
+        
+        # Restoran yeni oluştuysa varsayılan bir kategori de ekleyelim
+        category = models.Category(name="Popüler Seçimler", restaurant_id=restaurant.id)
+        db.add(category)
+        db.commit()
+        db.refresh(category)
+    else:
+        # Restoran varsa ilk kategorisini al
+        category = db.query(models.Category).filter(models.Category.restaurant_id == restaurant.id).first()
     
     # 2. Gelen verilerle yeni bir ürün oluştur
     new_item = models.MenuItem(
@@ -104,8 +118,8 @@ def add_menu_item(item: MenuItemCreate, db: Session = Depends(get_db)):
         category_id=category.id
     )
     
-    # 3. Veritabanına (MS SQL) kaydet
+    # 3. Veritabanına (Supabase) kaydet
     db.add(new_item)
     db.commit()
     
-    return {"mesaj": f"{item.name} başarıyla MS SQL veritabanına eklendi!"}
+    return {"mesaj": f"{item.name} başarıyla Supabase veritabanına eklendi!"}

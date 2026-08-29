@@ -1,14 +1,20 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 
 export default function AdminPanel() {
+  const [isMounted, setIsMounted] = useState(false);
   const [formData, setFormData] = useState({
     name: '', price: '', description: '', glb_url: '', usdz_url: ''
   });
   const [status, setStatus] = useState({ type: '', message: '' });
 
   const menuUrl = "http://192.168.1.109:3000"; 
+
+  // Sayfanın sadece tarayıcıda yüklendiğinden emin oluyoruz (Hydration sorununu çözer)
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,8 +45,11 @@ export default function AdminPanel() {
     }
   };
 
+  // Eğer bileşen henüz tarayıcıya monte edilmediyse boş döndür
+  if (!isMounted) return null;
+
   return (
-    <div className="saas-container">
+    <div className="saas-container" suppressHydrationWarning>
       <style>{`
         .saas-container {
           min-height: 100vh;
@@ -53,169 +62,46 @@ export default function AdminPanel() {
           padding: 60px 20px;
         }
         
-        .header-section {
-          width: 100%;
-          max-width: 1000px;
-          margin-bottom: 32px;
-          padding-bottom: 24px;
-          border-bottom: 1px solid #e5e7eb;
-        }
-
-        .header-section h1 {
-          font-size: 24px;
-          font-weight: 600;
-          margin: 0 0 8px 0;
-          letter-spacing: -0.025em;
-        }
-
-        .header-section p {
-          font-size: 14px;
-          color: #6b7280;
-          margin: 0;
-        }
-
-        .content-grid {
-          width: 100%;
-          max-width: 1000px;
-          display: grid;
-          grid-template-columns: 2fr 1fr;
-          gap: 24px;
-          align-items: start;
-        }
-
-        @media (max-width: 768px) {
-          .content-grid { grid-template-columns: 1fr; }
-        }
-
-        .panel {
-          background: #ffffff;
-          border: 1px solid #e5e7eb;
-          border-radius: 8px;
-          padding: 32px;
-          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-        }
-
-        .form-group {
-          margin-bottom: 20px;
-        }
-
-        .form-row {
-          display: flex;
-          gap: 16px;
-        }
-
-        .form-row .form-group {
-          flex: 1;
-        }
-
-        label {
-          display: block;
-          font-size: 13px;
-          font-weight: 500;
-          color: #374151;
-          margin-bottom: 6px;
-        }
-
+        .header-section { width: 100%; max-width: 1000px; margin-bottom: 32px; padding-bottom: 24px; border-bottom: 1px solid #e5e7eb; }
+        .header-section h1 { font-size: 24px; font-weight: 600; margin: 0 0 8px 0; letter-spacing: -0.025em; }
+        .header-section p { font-size: 14px; color: #6b7280; margin: 0; }
+        .content-grid { width: 100%; max-width: 1000px; display: grid; grid-template-columns: 2fr 1fr; gap: 24px; align-items: start; }
+        
+        @media (max-width: 768px) { .content-grid { grid-template-columns: 1fr; } }
+        
+        .panel { background: #ffffff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 32px; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+        .form-group { margin-bottom: 20px; }
+        .form-row { display: flex; gap: 16px; }
+        .form-row .form-group { flex: 1; }
+        label { display: block; font-size: 13px; font-weight: 500; color: #374151; margin-bottom: 6px; }
+        
         input, textarea {
-          width: 100%;
-          padding: 10px 12px;
-          background-color: #ffffff;
-          border: 1px solid #d1d5db;
-          border-radius: 6px;
-          font-size: 14px;
-          color: #111827;
-          box-sizing: border-box;
-          transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-          font-family: inherit;
+          width: 100%; padding: 10px 12px; background-color: #ffffff; border: 1px solid #d1d5db;
+          border-radius: 6px; font-size: 14px; color: #111827; box-sizing: border-box;
+          transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; font-family: inherit;
         }
-
-        input:focus, textarea:focus {
-          outline: none;
-          border-color: #000000;
-          box-shadow: 0 0 0 1px #000000;
-        }
-
-        input::placeholder, textarea::placeholder {
-          color: #9ca3af;
-        }
-
-        .section-divider {
-          margin: 32px 0 24px 0;
-          padding-top: 24px;
-          border-top: 1px solid #f3f4f6;
-        }
-
-        .section-title {
-          font-size: 14px;
-          font-weight: 600;
-          color: #111827;
-          margin-bottom: 16px;
-        }
-
+        input:focus, textarea:focus { outline: none; border-color: #000000; box-shadow: 0 0 0 1px #000000; }
+        input::placeholder, textarea::placeholder { color: #9ca3af; }
+        
+        .section-divider { margin: 32px 0 24px 0; padding-top: 24px; border-top: 1px solid #f3f4f6; }
+        .section-title { font-size: 14px; font-weight: 600; color: #111827; margin-bottom: 16px; }
+        
         .submit-btn {
-          width: 100%;
-          background-color: #000000;
-          color: #ffffff;
-          border: none;
-          border-radius: 6px;
-          padding: 12px 16px;
-          font-size: 14px;
-          font-weight: 500;
-          cursor: pointer;
-          transition: background-color 0.2s;
-          margin-top: 8px;
+          width: 100%; background-color: #000000; color: #ffffff; border: none; border-radius: 6px;
+          padding: 12px 16px; font-size: 14px; font-weight: 500; cursor: pointer; transition: background-color 0.2s; margin-top: 8px;
         }
-
-        .submit-btn:hover {
-          background-color: #374151;
-        }
-
-        .status-message {
-          margin-top: 16px;
-          padding: 12px;
-          border-radius: 6px;
-          font-size: 13px;
-          font-weight: 500;
-        }
-
+        .submit-btn:hover { background-color: #374151; }
+        
+        .status-message { margin-top: 16px; padding: 12px; border-radius: 6px; font-size: 13px; font-weight: 500; }
         .status-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
         .status-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
         .status-loading { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
-
-        /* QR KOD ALANI */
-        .qr-header {
-          margin-bottom: 24px;
-        }
-
-        .qr-header h2 {
-          font-size: 16px;
-          font-weight: 600;
-          margin: 0 0 4px 0;
-        }
-
-        .qr-header p {
-          font-size: 13px;
-          color: #6b7280;
-          margin: 0;
-          line-height: 1.5;
-        }
-
-        .qr-box {
-          background: #f9fafb;
-          border: 1px dashed #d1d5db;
-          border-radius: 8px;
-          padding: 32px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          margin-bottom: 16px;
-        }
-
-        .qr-footer {
-          font-size: 12px;
-          color: #9ca3af;
-          text-align: center;
-        }
+        
+        .qr-header { margin-bottom: 24px; }
+        .qr-header h2 { font-size: 16px; font-weight: 600; margin: 0 0 4px 0; }
+        .qr-header p { font-size: 13px; color: #6b7280; margin: 0; line-height: 1.5; }
+        .qr-box { background: #f9fafb; border: 1px dashed #d1d5db; border-radius: 8px; padding: 32px; display: flex; justify-content: center; align-items: center; margin-bottom: 16px; }
+        .qr-footer { font-size: 12px; color: #9ca3af; text-align: center; }
       `}</style>
 
       <div className="header-section">
@@ -225,7 +111,6 @@ export default function AdminPanel() {
 
       <div className="content-grid">
         
-        {/* SOL TARAF: FORM */}
         <div className="panel">
           <form onSubmit={handleSubmit}>
             <div className="form-row">
@@ -270,7 +155,6 @@ export default function AdminPanel() {
           </form>
         </div>
 
-        {/* SAĞ TARAF: QR KOD */}
         <div className="panel">
           <div className="qr-header">
             <h2>Masa QR Kodu</h2>
