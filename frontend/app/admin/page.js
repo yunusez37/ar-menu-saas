@@ -5,10 +5,11 @@ import { QRCodeCanvas } from 'qrcode.react';
 export default function AdminPanel() {
   const [isMounted, setIsMounted] = useState(false);
   const [formData, setFormData] = useState({
-    name: '', price: '', description: '', glb_url: '', usdz_url: ''
+    name: '', price: '', description: '', image_url: '', glb_url: '', usdz_url: ''
   });
   const [status, setStatus] = useState({ type: '', message: '' });
 
+  // Canlı Vercel Adresi (Müşteri Menüsüne Yönlendirir)
   const menuUrl = "https://ar-menu-saas1.vercel.app"; 
 
   // Sayfanın sadece tarayıcıda yüklendiğinden emin oluyoruz (Hydration sorununu çözer)
@@ -21,6 +22,7 @@ export default function AdminPanel() {
     setStatus({ type: 'loading', message: 'Kaydediliyor...' });
     
     try {
+      // Canlı Render (Backend) API Adresi
       const response = await fetch('https://ar-menu-saas-2.onrender.com/api/menu-ekle', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -28,6 +30,7 @@ export default function AdminPanel() {
           name: formData.name,
           price: parseFloat(formData.price),
           description: formData.description,
+          image_url: formData.image_url,
           glb_url: formData.glb_url,
           usdz_url: formData.usdz_url
         }),
@@ -36,6 +39,8 @@ export default function AdminPanel() {
       if(response.ok) {
         setStatus({ type: 'success', message: 'Ürün başarıyla menüye eklendi.' });
         e.target.reset();
+        // Form verilerini temizle
+        setFormData({ name: '', price: '', description: '', image_url: '', glb_url: '', usdz_url: '' });
         setTimeout(() => setStatus({ type: '', message: '' }), 3000);
       } else {
         setStatus({ type: 'error', message: 'Sistem hatası: Kayıt yapılamadı.' });
@@ -127,6 +132,11 @@ export default function AdminPanel() {
             <div className="form-group">
               <label>Açıklama</label>
               <textarea rows="3" placeholder="İçerik ve detayları girin..." style={{ resize: 'vertical' }} onChange={(e) => setFormData({...formData, description: e.target.value})} />
+            </div>
+
+            <div className="form-group" style={{ marginTop: '20px' }}>
+              <label>Ürün Görseli (URL)</label>
+              <input type="url" placeholder="https://.../urun-resmi.jpg" onChange={(e) => setFormData({...formData, image_url: e.target.value})} />
             </div>
 
             <div className="section-divider">

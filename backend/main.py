@@ -9,6 +9,7 @@ class MenuItemCreate(BaseModel):
     name: str
     price: float
     description: str = None
+    image_url: str = None
     glb_url: str = None
     usdz_url: str = None
 
@@ -47,6 +48,7 @@ def get_restaurant_menu(restaurant_slug: str, db: Session = Depends(get_db)):
                 "id": item.id,
                 "name": item.name,
                 "description": item.description,
+                "image_url": item.image_url,
                 "price": item.price,
                 "glb_url": item.glb_url,
                 "usdz_url": item.usdz_url
@@ -115,6 +117,7 @@ def add_menu_item(item: MenuItemCreate, db: Session = Depends(get_db)):
         name=item.name,
         price=item.price,
         description=item.description,
+        image_url=item.image_url,
         glb_url=item.glb_url,
         usdz_url=item.usdz_url,
         category_id=category.id
