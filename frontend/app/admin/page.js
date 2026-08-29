@@ -2,10 +2,18 @@
 import { useState, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 
+const CATEGORIES = [
+  "🗓️ Günün Menüsü", "🥘 Ana Yemekler", "🥩 Et Yemekleri", "🍗 Tavuk Yemekleri",
+  "🐟 Balık Yemekleri", "🥦 Sebze Yemekleri", "🍋 Zeytinyağlılar", "🥣 Çorbalar",
+  "🍛 Pilavlar", "🍝 Makarnalar", "🥗 Salatalar", "🌮 Mezeler",
+  "🍮 Tatlılar", "🧁 Kek Tarifleri", "🍪 Kurabiye Tarifleri", "🍰 Pasta Tarifleri",
+  "🍳 Kahvaltılıklar", "🥨 Hamur İşleri", "🥯 Poğaça Tarifleri", "🥐 Börek Tarifleri"
+];
+
 export default function AdminPanel() {
   const [isMounted, setIsMounted] = useState(false);
   const [formData, setFormData] = useState({
-    name: '', price: '', description: '', image_url: '', glb_url: '', usdz_url: '', category_name: 'Ana Yemekler 🍽️'
+    name: '', price: '', description: '', image_url: '', glb_url: '', usdz_url: '', category_name: CATEGORIES[0]
   });
   const [status, setStatus] = useState({ type: '', message: '' });
   const [menuItems, setMenuItems] = useState([]);
@@ -75,7 +83,7 @@ export default function AdminPanel() {
         .panel { background: #fff; border: 1px solid #e5e7eb; border-radius: 8px; padding: 32px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
         .form-group { margin-bottom: 20px; }
         label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-        input, textarea { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; }
+        input, textarea, select { width: 100%; padding: 10px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px; background: #fff; }
         .submit-btn { width: 100%; background: #000; color: #fff; border: none; border-radius: 6px; padding: 12px; font-weight: 600; cursor: pointer; }
         .delete-btn { background: #ef4444; color: white; border: none; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 12px; }
         .list-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; }
@@ -90,10 +98,16 @@ export default function AdminPanel() {
           <div className="panel" style={{marginBottom: '24px'}}>
             <h2 style={{fontSize: '18px', marginBottom: '20px'}}>Yeni Ürün Ekle</h2>
             <form onSubmit={handleSubmit}>
+              
               <div className="form-group">
-                <label>Kategori Adı (Emojili yazabilirsiniz)</label>
-                <input type="text" placeholder="Örn: Pizzalar 🍕" required value={formData.category_name} onChange={(e) => setFormData({...formData, category_name: e.target.value})} />
+                <label>Kategori Seçiniz</label>
+                <select required value={formData.category_name} onChange={(e) => setFormData({...formData, category_name: e.target.value})}>
+                  {CATEGORIES.map((cat, idx) => (
+                    <option key={idx} value={cat}>{cat}</option>
+                  ))}
+                </select>
               </div>
+
               <div style={{display: 'flex', gap: '16px'}}>
                 <div className="form-group" style={{flex: 1}}>
                   <label>Ürün Adı</label>
@@ -110,7 +124,7 @@ export default function AdminPanel() {
               </div>
               <div className="form-group">
                 <label>Görsel URL</label>
-                <input type="url" value={formData.image_url} onChange={(e) => setFormData({...formData, image_url: e.target.value})} />
+                <input type="url" placeholder="https://..." value={formData.image_url} onChange={(e) => setFormData({...formData, image_url: e.target.value})} />
               </div>
               <div style={{display: 'flex', gap: '16px'}}>
                 <div className="form-group" style={{flex: 1}}>
